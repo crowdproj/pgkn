@@ -132,6 +132,7 @@ private class PostgresDriverImpl(
     private fun doExecute(sql: String, paramSource: SqlParameterSource): CPointer<PGresult> {
         val parsedSql = parseSql(sql)
         val sqlToUse: String = substituteNamedParameters(parsedSql, paramSource)
+        println("SQL to use: $sqlToUse")
         val params: Array<Any?> = buildValueArray(parsedSql, paramSource)
 
         return memScoped {
