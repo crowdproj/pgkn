@@ -95,7 +95,10 @@ private class PostgresDriverImpl(
         pwd = password,
         pgoptions = null,
         pgtty = null
-    ).apply { require(ConnStatusType.CONNECTION_OK == PQstatus(this)) }!!
+    ).apply { require(ConnStatusType.CONNECTION_OK == PQstatus(this)) {
+        "Actual connection status is not CONNECTION_OK: ${PQstatus(this)}. Error: ${error()}"
+    } }
+        ?: throw Exception("Connection is NULL")
 
     override fun <T> execute(sql: String, namedParameters: Map<String, Any?>, handler: (ResultSet) -> T) =
         if (namedParameters.isEmpty()) doExecute(sql).handleResults(handler)
@@ -132,12 +135,7 @@ private class PostgresDriverImpl(
     private fun doExecute(sql: String, paramSource: SqlParameterSource): CPointer<PGresult> {
         val parsedSql = parseSql(sql)
 
-        paramSource.parameterNames?.forEach {
-            println("PARAM SOURCE $it")
-            println("paramSource: ${it}::${paramSource.getTypeName(it)} = ${paramSource.getValue(it)}")
-        } ?: println("NULL paramSource")
         val sqlToUse: String = substituteNamedParameters(parsedSql, paramSource)
-        println("SQL to use: $sqlToUse")
         val params: Array<Any?> = buildValueArray(parsedSql, paramSource)
 
         return memScoped {
@@ -189,5 +187,5 @@ private fun CPointer<PGconn>?.error(): String = PQerrorMessage(this)!!.toKString
 
 private const val TEXT_RESULT_FORMAT = 0
 
-@Suppress("UnusedPrivateProperty")
+@Suppress("UnusedPrivateProperty", "unused")
 private const val BINARY_RESULT_FORMAT = 1
