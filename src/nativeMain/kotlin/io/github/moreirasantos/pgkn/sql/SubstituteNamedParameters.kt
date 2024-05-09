@@ -38,7 +38,8 @@ internal fun substituteNamedParameters(parsedSql: ParsedSql, paramSource: SqlPar
         val endIndex = indexes[1]
         actualSql.append(originalSql, lastIndex, startIndex)
         if (paramSource != null && paramSource.hasValue(paramName)) {
-            val value: Any = paramSource.getValue(paramName)!!
+            val value: Any? = paramSource.getValue(paramName)
+            println("PR $i $paramName $parameterNumber $value")
             /*
             if (value is SqlParameterValue) {
                 value = (value as SqlParameterValue).getValue()

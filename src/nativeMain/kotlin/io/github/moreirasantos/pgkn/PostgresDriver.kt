@@ -131,6 +131,11 @@ private class PostgresDriverImpl(
 
     private fun doExecute(sql: String, paramSource: SqlParameterSource): CPointer<PGresult> {
         val parsedSql = parseSql(sql)
+
+        paramSource.parameterNames?.forEach {
+            println("PARAM SOURCE $it")
+            println("paramSource: ${it}::${paramSource.getTypeName(it)} = ${paramSource.getValue(it)}")
+        } ?: println("NULL paramSource")
         val sqlToUse: String = substituteNamedParameters(parsedSql, paramSource)
         println("SQL to use: $sqlToUse")
         val params: Array<Any?> = buildValueArray(parsedSql, paramSource)
